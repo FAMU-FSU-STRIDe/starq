@@ -13,7 +13,8 @@ RUN apt-get update && \
         ros-humble-microstrain-inertial-driver \
         ros-humble-microstrain-inertial-examples \
         ros-humble-usb-cam \
-        ros-humble-robot-localization
+        ros-humble-robot-localization \
+        python3 python3-pip
 
 # Create a new user with a specific UID and GID, and set up the workspace
 RUN useradd -m -u 1000 -s /bin/bash nvidia && \
@@ -57,5 +58,12 @@ RUN echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
 RUN echo "source /home/nvidia/starq_ws/install/setup.bash" >> ~/.bashrc
 RUN echo "export PATH=$PATH:/home/nvidia/starq_ws/build/starq" >> ~/.bashrc
 
+# RUN apt-get install -y python3 python3-pip
+RUN pip3 install Jetson.GPIO
+COPY water_shutdown.py /usr/src/app
+# RUN chmod +x /usr/src/app/water_shutdown.py
+
+
 # Set the default command to execute when creating a new container
+# CMD ["bash & python3 /usr/src/app/water_shutdown.py"]
 CMD ["bash"]
