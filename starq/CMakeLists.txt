@@ -211,10 +211,14 @@ target_link_libraries(test_ros2_mpc_joystick_mujoco starqlib)
 add_executable(test_ros2_camera_mujoco tests/test_ros2_camera_mujoco.cpp)
 target_link_libraries(test_ros2_camera_mujoco starqlib)
 
+add_executable(test_joystick_swim_trajectory tests/test_joystick_swim_trajectory.cpp)
+target_link_libraries(test_joystick_swim_trajectory starqlib)
+
 # Install the ROS executables to the appropriate directory
 install(TARGETS 
   test_ros2_mpc_joystick_mujoco
   test_ros2_camera_mujoco
+  test_joystick_swim_trajectory
   DESTINATION lib/${PROJECT_NAME}
 )
 
