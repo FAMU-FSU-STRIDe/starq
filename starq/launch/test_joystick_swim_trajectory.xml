@@ -2,6 +2,6 @@
 
     <node pkg="starq" exec="test_joystick_swim_trajectory" name="test_joystick_swim_trajectory"  output="screen"/>
 
-    <node pkg="joy" exec="joy_node" name="joy_node" output="screen"/>
+    <!-- <node pkg="joy" exec="joy_node" name="joy_node" output="screen"/> -->
 
 </launch>
