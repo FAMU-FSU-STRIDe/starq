@@ -52,8 +52,8 @@ private:
             RCLCPP_INFO(this->get_logger(), "Phi increased to %.4f", phi_);
         }
 
-        const int8_t left_axis_x = msg->axes[1] * 128;
-        const Float freq = max_freq_ * left_axis_x / 128.0;
+        const int8_t left_axis_x = msg->axes[1] * 5;
+        const Float freq = max_freq_ * left_axis_x / 5.0;
 
         if (!STARQ_->getTrajectoryController()->isRunning() && left_axis_x > 0)
         {
