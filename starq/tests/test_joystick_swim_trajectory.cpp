@@ -15,6 +15,8 @@ public:
 
         joy_sub_ = this->create_subscription<sensor_msgs::msg::Joy>(
             "joy", 10, std::bind(&JoystickTrajectoryNode::joyCallback, this, std::placeholders::_1));
+
+	RCLCPP_INFO(this->get_logger(), "Joystick Initialized.");
     }
 
     ~JoystickTrajectoryNode()
@@ -29,28 +31,32 @@ private:
         {
             // X
             STARQ_->setStates(AxisState::CLOSED_LOOP_CONTROL);
+	    RCLCPP_INFO(this->get_logger(), "Switching to Closed Loop Control");
         }
         else if (msg->buttons[1] == 1)
         {
             // A
             STARQ_->setStates(AxisState::IDLE);
+	    RCLCPP_INFO(this->get_logger(), "Switching to Idle");
         }
         else if (msg->buttons[4] == 1)
         {
             // LB
             phi_ -= phi_res_;
+	    RCLCPP_INFO(this->get_logger(), "Phi decreased to %.4f", phi_);
         }
         else if (msg->buttons[5] == 1)
         {
             // RB
             phi_ += phi_res_;
+	    RCLCPP_INFO(this->get_logger(), "Phi increased to %.4f", phi_);
         }
 
         const int8_t left_axis_x = msg->axes[1] * 128;
         const Float freq = max_freq_ * left_axis_x / 128.0;
 
-        if (!STARQ_->getTrajectoryController()->isRunning() && left_axis_x > 0)
-        {
+	if (!STARQ_->getTrajectoryController()->isRunning() && left_axis_x > 0)
+        { 
             Trajectory trajectory = generateTrajectory(freq);
             STARQ_->runTrajectory(trajectory);
         }
@@ -100,8 +106,8 @@ private:
 
     std::size_t num_points_ = 100;
     Float max_freq_ = 2.5;
-    Float L0_ = 1.0;
-    Float phi_ = 4 * M_PI / 4;
+    Float L0_ = 0.18;
+    Float phi_ = -3 * M_PI / 4;
     Float phi_res_ = M_PI / 16;
     Float xamp_ = 1.0;
     Float yamp_ = 0.1;
