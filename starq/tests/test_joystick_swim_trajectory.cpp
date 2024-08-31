@@ -27,37 +27,79 @@ public:
 private:
     void joyCallback(const sensor_msgs::msg::Joy::SharedPtr msg)
     {
-        if (msg->buttons[0] == 1)
+        if (msg->buttons[0] == 1 && last_msg_.buttons[0] == 0)
         {
-            // X
+            // 1
             STARQ_->setStates(AxisState::CLOSED_LOOP_CONTROL);
             RCLCPP_INFO(this->get_logger(), "Switching to Closed Loop Control");
         }
-        else if (msg->buttons[1] == 1)
+        else if (msg->buttons[1] == 1 && last_msg_.buttons[1] == 0)
         {
-            // A
+            // 2
             STARQ_->setStates(AxisState::IDLE);
             RCLCPP_INFO(this->get_logger(), "Switching to Idle");
         }
-        else if (msg->buttons[4] == 1)
+        else if (msg->buttons[2] == 1 && last_msg_.buttons[2] == 0)
+        {
+            // 3
+            static_ = !static_;
+            RCLCPP_INFO(this->get_logger(), "Switching to %s", static_ ? "Static" : "Moving");
+        }
+        else if (msg->buttons[4] == 1 && last_msg_.buttons[4] == 0)
         {
             // LB
             phi_ -= phi_res_;
             RCLCPP_INFO(this->get_logger(), "Phi decreased to %.4f", phi_);
         }
-        else if (msg->buttons[5] == 1)
+        else if (msg->buttons[5] == 1 && last_msg_.buttons[5] == 0)
         {
             // RB
             phi_ += phi_res_;
             RCLCPP_INFO(this->get_logger(), "Phi increased to %.4f", phi_);
         }
-
-        const int8_t left_axis_x = msg->axes[1] * 5;
-        const Float freq = max_freq_ * left_axis_x / 5.0;
-
-        if (!STARQ_->getTrajectoryController()->isRunning() && left_axis_x > 0)
+        else if (msg->buttons[6] == 1 && last_msg_.buttons[6] == 0)
         {
-            Trajectory trajectory = generateTrajectory(freq);
+            // LT
+            freq_ -= freq_res_;
+            freq_ = std::max(freq_, freq_res_);
+            RCLCPP_INFO(this->get_logger(), "Frequency decreased to %.4f", freq_);
+        }
+        else if (msg->buttons[7] == 1 && last_msg_.buttons[7] == 0)
+        {
+            // RT
+            freq_ += freq_res_;
+            RCLCPP_INFO(this->get_logger(), "Frequency increased to %.4f", freq_);
+        }
+        else if (msg->axes[4] >= 0.5 && last_msg_.axes[4] < 0.5)
+        {
+            // Cross left
+            yamp_ -= yamp_res_;
+            yamp_ = std::max(yamp_, 0.0);
+            RCLCPP_INFO(this->get_logger(), "Y Amplitude decreased to %.4f", yamp_);
+        }
+        else if (msg->axes[4] <= -0.5 && last_msg_.axes[4] > -0.5)
+        {
+            // Cross right
+            yamp_ += yamp_res_;
+            RCLCPP_INFO(this->get_logger(), "Y Amplitude increased to %.4f", yamp_);
+        }
+        else if (msg->axes[5] >= 0.5 && last_msg_.axes[5] < 0.5)
+        {
+            // Cross up
+            xamp_ += xamp_res_;
+            RCLCPP_INFO(this->get_logger(), "X Amplitude increased to %.4f", xamp_);
+        }
+        else if (msg->axes[5] <= -0.5 && last_msg_.axes[5] > -0.5)
+        {
+            // Cross down
+            xamp_ -= xamp_res_;
+            xamp_ = std::max(xamp_, 0.0);
+            RCLCPP_INFO(this->get_logger(), "X Amplitude decreased to %.4f", xamp_);
+        }
+
+        if (!STARQ_->getTrajectoryController()->isRunning() && !static_)
+        {
+            Trajectory trajectory = generateTrajectory();
             STARQ_->runTrajectory(trajectory);
         }
         else if (!STARQ_->getTrajectoryController()->isRunning())
@@ -67,9 +109,11 @@ private:
             for (std::size_t i = 0; i < STARQ_->getLegs().size(); i++)
                 STARQ_->setFootPosition(i, Vector3(x0, 0.0, y0));
         }
+
+        last_msg_ = *msg;
     }
 
-    Trajectory generateTrajectory(const Float freq)
+    Trajectory generateTrajectory()
     {
         Trajectory trajectory;
         trajectory.reserve(num_points_);
@@ -101,7 +145,7 @@ private:
             for (std::size_t i = 0; i < STARQ_->getLegs().size(); i++)
             {
                 LegCommand::Ptr command = std::make_shared<LegCommand>();
-                command->delay = std::chrono::milliseconds(time_t(1000 * t / freq));
+                command->delay = std::chrono::milliseconds(time_t(1000 * (float(t) / num_points_) / freq_));
                 command->leg_id = i;
                 command->control_mode = ControlMode::POSITION;
                 command->target_position = Vector3(p.x(), 0.0, p.y());
@@ -114,14 +158,19 @@ private:
 
     STARQRobot::Ptr STARQ_;
     rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
+    sensor_msgs::msg::Joy last_msg_;
 
     std::size_t num_points_ = 100;
-    Float max_freq_ = 2.5;
+    bool static_ = true;
+    Float freq_ = 1.0;
+    Float freq_res_ = 0.25;
     Float L0_ = 0.18;
     Float phi_ = -3 * M_PI / 4;
-    Float phi_res_ = M_PI / 16;
+    Float phi_res_ = M_PI / 64;
     Float xamp_ = 0.02;
+    Float xamp_res_ = 0.005;
     Float yamp_ = 0.005;
+    Float yamp_res_ = 0.001;
     Float maxr_ = 0.2;
     Float minr_ = 0.1;
 };
