@@ -164,15 +164,15 @@ private:
     bool static_ = true;
     Float freq_ = 1.0;
     Float freq_res_ = 0.25;
-    Float L0_ = 0.18;
+    Float L0_ = 0.205;
     Float phi_ = -3 * M_PI / 4;
     Float phi_res_ = M_PI / 64;
     Float xamp_ = 0.02;
     Float xamp_res_ = 0.005;
     Float yamp_ = 0.005;
     Float yamp_res_ = 0.001;
-    Float maxr_ = 0.2;
-    Float minr_ = 0.1;
+    Float maxr_ = 0.216;
+    Float minr_ = 0.084;
 };
 
 int main(int argc, char **argv)
