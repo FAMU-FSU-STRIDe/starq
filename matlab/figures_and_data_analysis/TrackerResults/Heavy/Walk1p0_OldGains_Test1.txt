@@ -1,0 +1,2 @@
+	mass A									
+t	x	y	r	vx	vy	v	ax	ay	a	
