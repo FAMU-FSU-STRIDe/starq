@@ -52,6 +52,42 @@ WalkingData.heavy.f1p25.files = ["TrackerResults/Heavy/Walk1p25_OldGains_Test1".
     "TrackerResults/Heavy/Walk1p25_OldGains_Test2"...
     "TrackerResults/Heavy/Walk1p25_OldGains_Test3"];
 
+WalkingData.heavy.f1p75.files = [...
+    "TrackerResults/HeavyWalkNew/Walk_1p75_T1"...
+    "TrackerResults/HeavyWalkNew/Walk_1p75_T2"...
+    "TrackerResults/HeavyWalkNew/Walk_1p75_T3"...
+    ];
+
+WalkingData.heavy.f2p0.files = [...
+    "TrackerResults/HeavyWalkNew/Walk_2_T1"...
+    "TrackerResults/HeavyWalkNew/Walk_2_T2"...
+    "TrackerResults/HeavyWalkNew/Walk_2_T3"...
+    ];
+
+WalkingData.heavy.f2p5.files = [...
+    "TrackerResults/HeavyWalkNew/Walk_2p5_T1"...
+    "TrackerResults/HeavyWalkNew/Walk_2p5_T2"...
+    "TrackerResults/HeavyWalkNew/Walk_2p5_T3"...
+    ];
+
+WalkingData.heavy.f3p0.files = [...
+    "TrackerResults/HeavyWalkNew/Walk_3_T1"...
+    "TrackerResults/HeavyWalkNew/Walk_3_T2"...
+    "TrackerResults/HeavyWalkNew/Walk_3_T3"...
+    ];
+
+WalkingData.heavy.f3p5.files = [...
+    "TrackerResults/HeavyWalkNew/Walk_3p5_T1"...
+    "TrackerResults/HeavyWalkNew/Walk_3p5_T2"...
+    "TrackerResults/HeavyWalkNew/Walk_3p5_T3"...
+    ];
+
+WalkingData.heavy.f4p0.files = [...
+    "TrackerResults/HeavyWalkNew/Walk_4_T1"...
+    "TrackerResults/HeavyWalkNew/Walk_4_T2"...
+    "TrackerResults/HeavyWalkNew/Walk_4_T3"...
+    ];
+
 JumpingData.buoy.f0p1.files = [...
     "TrackerResults/Buoyant/JumpBuoy_0p1_T1"...
     "TrackerResults/Buoyant/JumpBuoy_0p1_T2"...
@@ -121,7 +157,7 @@ JumpingData.heavy.f1p0.files = [...
 SwimmingData.v1a.files = [...
     "TrackerResults/Swimming/Swim_V1a_T1"...
     "TrackerResults/Swimming/Swim_V1a_T2"...
-    "TrackerResults/Swimming/Swim_V1a_T3"...
+    % "TrackerResults/Swimming/Swim_V1a_T3"...
     ];
 
 SwimmingData.v1b.files = [...
@@ -131,6 +167,12 @@ SwimmingData.v1b.files = [...
 
 SwimmingData.v1cb.files = [...
     "TrackerResults/Swimming/Swim_V1CB_T1"...
+    ];
+
+SwimmingData.v1c.files = [...
+    "TrackerResults/Swimming/Swim_V1C_T1"...
+    "TrackerResults/Swimming/Swim_V1C_T2"...
+    "TrackerResults/Swimming/Swim_V1C_T3"...
     ];
 
 
@@ -147,7 +189,7 @@ end
 
 % getting walking speeds
 buoyWalkingFreqs = [0.1 0.2 0.25 0.35 0.5];
-heavyWalkingFreqs = [ 0.5 0.75 1.0 1.25 1.5];
+heavyWalkingFreqs = [ 0.5 0.75 1.0 1.25 1.5 1.75 2.0 2.5 3 3.5 4];
 
 sh = WalkingData.buoy; % sh for shorthand
 buoyWalkingVels = [sh.f0p1.avgVelOverall...
@@ -161,7 +203,14 @@ heavyWalkingVels = [sh.f0p5.avgVelOverall...
     sh.f0p75.avgVelOverall...
     sh.f1p0.avgVelOverall...
     sh.f1p25.avgVelOverall...
-    sh.f1p5.avgVelOverall];
+    sh.f1p5.avgVelOverall...
+    sh.f1p75.avgVelOverall...
+    sh.f2p0.avgVelOverall...
+    sh.f2p5.avgVelOverall...
+    sh.f3p0.avgVelOverall...
+    sh.f3p5.avgVelOverall...
+    sh.f4p0.avgVelOverall...
+    ];
 
 figure('Name',"ComparingWalkingVels")
 hold on
@@ -170,8 +219,8 @@ plot(heavyWalkingFreqs,heavyWalkingVels,'ko--','LineWidth',3)
 xlabel("Gait Frequency (Hz)")
 ylabel("Walking speed (m/s)")
 legend("Increased Buoyancy","Nominal Weight","Location","northwest")
-ylim([0 0.16])
-xlim([0 1.6])
+ylim([0 0.2])
+xlim([0 4.5])
 FormatPlot(gca)
 
 % getting jump heights
@@ -220,24 +269,87 @@ for i = 1:length(swimmingFields)
     SwimmingData.(swimmingFields{i}) = getAvgVels(SwimmingData.(swimmingFields{i}));
 end
 
-swimAreas = [1 2 3];
+swimAreas = [1 2 3 4];
 
 
 sh = SwimmingData; % sh for shorthand
 swimmingVels = [sh.v1a.avgVelOverall...
     sh.v1b.avgVelOverall...
     sh.v1cb.avgVelOverall...
+    sh.v1c.avgVelOverall...
     ];
 
-figure('Name',"Swimming")
-hold on
-plot(swimAreas,swimmingVels,'ko--','LineWidth',3)
-xlabel("Gait Frequency (Hz)")
-ylabel("Walking speed (m/s)")
-legend("Increased Buoyancy","Nominal Weight","Location","northwest")
-ylim([0 0.16])
-xlim([0 1.6])
+barLabels = categorical({'Fin A','Fin B','Fin BC','Fin C'});
+barLabels = reordercats(barLabels,{'Fin A','Fin B','Fin BC','Fin C'});
+barplotdata = swimmingVels;
+
+
+figure()
+b=bar(barLabels,barplotdata,'c');
+xtips1 = b(1).XEndPoints;
+ytips1 = b(1).YEndPoints;
+labels1 = string(b(1).YData);
+labels1 = extractBefore(labels1,5);
+labels1 = strcat(labels1,["m/s" "m/s" "m/s" "m/s"]);
+text(xtips1,ytips1,labels1,'HorizontalAlignment','center',...
+    'VerticalAlignment','bottom')
+ylabel("Swimming speed (m/s)",'FontSize',16)
 FormatPlot(gca)
+
+figure()
+areas = [4*26.5 4*45.6 2*45.6+2*]
+
+%% Gaits Figure
+walk = readmatrix("walk_shortlinks_trot.txt");
+walk = [walk(1:500,5) walk(1:500,7) ].*1000;
+jump = readmatrix("Jump3DP.txt");
+jump = [jump(1:500,5) jump(1:500,7) ].*1000;
+figure()
+hold on
+L1 = 66;
+L2 = 150;
+theta = -3*pi/2:0.1:pi/2;
+xws1 = L1*cos(theta);
+yws1 = L1*sin(theta);
+xws2 = (L1+L2)*cos(theta);
+yws2 = (L1+L2)*sin(theta);
+xws2 = flip(xws2);
+yws2 = flip(yws2);
+xpts = [xws1 xws2 xws1(1)];
+ypts = [yws1 yws2 yws1(1)];
+
+patch(xpts,ypts,[255 231 231]./255)
+plot(jump(:,1),jump(:,2),'b','LineWidth',5,'Color',[158 94 206]./255)
+plot(walk(:,1),walk(:,2),'LineWidth',5,'Color',[146 208 80]./255)
+
+t = linspace(0,2*pi,100);
+
+L0 = 180;
+phi = -6*pi/8;
+
+x0 = L0*cos(phi);
+y0 = L0*sin(phi);
+
+xamp = 100;
+yamp = 5;
+x = xamp.*sin(t);
+y = yamp.*cos(t);
+
+traj = [x.' y.'];
+
+theta = phi+pi/2;
+
+R = [cos(theta) sin(theta);
+    -sin(theta) cos(theta)];
+
+traj = traj*R;
+swim = traj+[x0 y0];
+plot(swim(:,1),swim(:,2),'LineWidth',5,'Color',[0 176 240]./255)
+axis equal
+xlabel('Horizontal Position (mm)')
+ylabel('Vertical Position (mm)')
+% legend('Workspace','Climbing trajectory','Walking Trajectory','Swimming Trajectory')
+
 function dataStruct = getAvgVels(dataStruct)
 avgVels = [];
 for i = 1:length(dataStruct.files)
