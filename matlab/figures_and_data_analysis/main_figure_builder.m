@@ -307,8 +307,8 @@ FormatPlot(gca)
 %% Gaits Figure
 walk = readmatrix("walk_shortlinks_trot.txt");
 walk = [walk(1:500,5) walk(1:500,7) ].*1000;
-jump = readmatrix("Jump3DP.txt");
-jump = [jump(1:500,5) jump(1:500,7) ].*1000;
+jump = readmatrix("jump_big_straight.txt");
+jump = [jump(1:1000,5) jump(1:1000,7) ].*1000;
 figure()
 hold on
 L1 = 66;
@@ -353,6 +353,7 @@ plot(swim(:,1),swim(:,2),'LineWidth',5,'Color',[0 176 240]./255)
 axis equal
 xlabel('Horizontal Position (mm)')
 ylabel('Vertical Position (mm)')
+set(gca,'FontName','Times New Roman')
 % legend('Workspace','Climbing trajectory','Walking Trajectory','Swimming Trajectory')
 
 function dataStruct = getAvgVels(dataStruct)
@@ -396,6 +397,7 @@ ax.YLabel.FontSize = 16;
 grid on
 ax.GridLineStyle = "--";
 ax.LineWidth = 1.5;
+ax.FontName = 'Times New Roman';
 end
 
 function dataStruct = getMaxHeight(dataStruct)
